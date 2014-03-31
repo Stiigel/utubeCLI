@@ -8,8 +8,9 @@ Dependencies
 
 -mpv
 -youtube-dl
--python3
+-python3 
 -python3-requests
+ *This maybe works on python2 too, haven't tested that.
 -and maybe something else
 
 Originally utubeCLI uses mpv for playing files, but that can be easily changed to eg. mplayer
