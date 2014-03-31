@@ -1,3 +1,25 @@
 utubeCLI
+--------
+
 is a great alternative to ugly and heavy YouTube browser interface.
+
+Dependencies
+------------
+
+-mpv
+-youtube-dl
+-python3
+-python3-requests
+-and maybe something else
+
+Originally utubeCLI uses mpv for playing files, but that can be easily changed to eg. mplayer
+
+Using
+-----
+
+python3 /path/to/paa.py
+
+Help with --help on startup or while using utubeCLI
+
+
 
