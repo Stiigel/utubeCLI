@@ -1,3 +1,8 @@
+"""
+Kaikki itse YTiin liittyvät jutut, ja musan/videojen näyttäminen ja lataaminen
+
+"""
+
 import sys, re
 import subprocess
 import requests

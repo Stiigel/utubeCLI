@@ -1,10 +1,15 @@
+"""
+Käsittelee käyttäjän antamat komennot, ja välittää ne utubelle
+
+"""
+
 import shlex
-import utube_dev
+import utube
 
 class Kayttoliittyma:
   def __init__(self):
     self.monta = 10
-    self.youtube = utube_dev.Utube()
+    self.youtube = utube.Utube()
     
   def tulosta_asetukset(self):
     print("    ", end="")    
@@ -28,9 +33,12 @@ class Kayttoliittyma:
     print(" l [mones]          - mones tulos ladataan")
     print(" onk/l [haku]       - kokeile onneasi, kuuntele/lataa")
     
-  def aloita(self):
+  def aloita(self, apu=False):
     pois = ["bye", "exit", "quit", "moi", "pois"]
     
+    if apu == True:
+      self.auta()
+      
     while True:
       self.tulosta_asetukset()
       try:

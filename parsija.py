@@ -1,3 +1,9 @@
+"""
+Parsii YT-sivun tarvittaviksi osasiksi.
+Toimii surkeasti.
+
+"""
+
 import re
 
 class Parsija:  
