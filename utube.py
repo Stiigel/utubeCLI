@@ -6,7 +6,6 @@ Kaikki itse YTiin liittyvät jutut, ja musan/videojen näyttäminen ja lataamine
 import sys, re
 import subprocess
 import requests
-import parsija
 
 class Utube:
   
@@ -18,6 +17,7 @@ class Utube:
     self.tekijat = []
     self.otsakkeet = []
     self.kerrat = []
+    self.sittenit = []
     
   def laita_video(self):
     self.video = not self.video
@@ -28,13 +28,45 @@ class Utube:
   def kasittele_haku(self, haku):    
     parametrit = { "search_query" : haku, "filters" : "video", "lclk" : "video", "hl" : "fi" }
     responssi = requests.get("https://www.youtube.com/results", params=parametrit, verify=False)
-    teksti = responssi.text    
-    persilja = parsija.Parsija(teksti)
+    teksti = responssi.text.split("\n")
     
-    self.linkit = persilja.ota_linkit()
-    self.ajat = persilja.ota_ajat()
-    self.tekijat = persilja.ota_tekijat()
-    self.otsakkeet = persilja.ota_hakuOtsakkeet()   
+    kohta = -1
+    tietoAlku = -1
+    tekijaAlku = -1
+    for i in range(len(teksti)):
+      if "/watch?v=" in teksti[i]:
+        kohta = i
+
+      if kohta != -1:
+        if 'class="video-time">' in teksti[i]:
+          self.ajat.append(re.search('"video-time">(.*?)</span>', teksti[i]).group(1))
+          
+        if 'yt-uix-sessionlink yt-uix-tile-link' in teksti[i]:
+          tietoAlku = i
+        
+        if tietoAlku != -1:
+          if 'title="' in teksti[i]:
+            self.otsakkeet.append(re.search('title="(.*?)"', teksti[i]).group(1))
+          
+          if 'href="/watch?v=' in teksti[i]:
+            self.linkit.append(re.search('href="/watch\?v=(.*?)"', teksti[i]).group(1))
+            tietoAlku = -1
+
+          if '>' in teksti[i]:
+            tietoAlku = -1
+        
+        if 'g-hovercard yt-uix-sessionlink yt-user-name spf-link' in teksti[i]:
+          tekijaAlku = i
+        
+        if tekijaAlku != -1:
+          if 'data-name' in teksti[i]:
+            self.tekijat.append(re.search('data-name="">(.*?)</a>', teksti[i]).group(1))
+          if 'sitten' in teksti[i]:
+            self.sittenit.append(re.search('<li>(.*?)sitten</li><li>', teksti[i]).group(1))
+          if 'näyttökertaa' in teksti[i]:
+            self.kerrat.append(re.search('<li>(.*?) näyttökertaa</li>',teksti[i]).group(1))
+            tekijaAlku = -1
+            kohta = -1 
         
   def ota_otsake(self, linkki):
     responssi = requests.get(linkki, verify=False)
@@ -74,20 +106,27 @@ class Utube:
     
   def nayta_tulokset(self, monta):
     for i in range(monta):
-      try:
+      if len(self.tekijat) >= i:
         tekija = self.tekijat[i]
-      except:
+      else:
         tekija = "ei tekijää"
-      try:
+        
+      if len(self.otsakkeet) >= i:
         otsake = self.otsakkeet[i]
-      except:
+      else:
         otsake = "ei otsaketta"
-      try:
+        
+      if len(self.ajat) >= i:
         aika = self.ajat[i]
-      except:
+      else:
         aika = "eipä aikaakaan"
+        
+      if len(self.sittenit) >= i:
+        sitten = self.sittenit[i] + "sitten"
+      else:
+        sitten = "Eis itten"
       
-      print(str(i + 1) + ". tulos: " + otsake + " | " + aika + " | " + tekija)
+      print(str(i + 1) + ". tulos: " + otsake + " | " + aika + " | " + tekija + " | " + sitten)
       
       if i >= 20:
         break
