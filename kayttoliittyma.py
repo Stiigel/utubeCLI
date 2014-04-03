@@ -66,29 +66,24 @@ class Kayttoliittyma:
         break
 
       if komento[0] == "hae":
-        try: 
-          self.youtube.kasittele_haku(komento[1])          
-          self.monta = int(komento[2])
+        if len(komento) >= 2: 
+          self.youtube.kasittele_haku(komento[1])     
+          if len(komento) >= 3:
+            self.monta = int(komento[2])
           self.youtube.nayta_tulokset(self.monta)         
-            
-        except:
-          self.youtube.nayta_tulokset(self.monta)
-        
+
       if komento[0][0 : 2] == "on":
-        try:
-          try:
-            mones = int(komento[2])
-          except:
-            mones = 1
-          self.youtube.kasittele_haku(komento[1])
+        if len(komento) >= 3:
+          mones = int(komento[2])
+        else:
+          mones = 1
+        self.youtube.kasittele_haku(komento[1])
+        if len(komento[0]) >= 3:
           if komento[0][2] == "k":
             self.youtube.kuuntele_kpl(mones - 1)
-          
+        
           elif komento[0][2] == "l":
             self.youtube.lataa_kpl(mones - 1)
-            
-        except:
-          print("¡Fetaliikennemerkki bärs!")
           
       elif komento[0] == "l":
         try:
