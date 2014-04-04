@@ -3,10 +3,9 @@ Kaikki itse YTiin liittyvät jutut, ja musan/videojen näyttäminen ja lataamine
 
 """
 
-import sys, re
+import sys, re, parsija
 import subprocess
 import requests
-from parsija import *
 
 class Utube:
   
@@ -28,9 +27,8 @@ class Utube:
     parametrit = { "search_query" : haku, "filters" : "video", "lclk" : "video", "hl" : "fi" }
     responssi = requests.get("https://www.youtube.com/results", params=parametrit, verify=False)
     teksti = responssi.text.split("\n")
-    parsija = Parsija()
     
-    self.tulokset = parsija.kasittele_haku(teksti)
+    self.tulokset = parsija.parsi_haku(teksti)
 
   def kasittele_ehdotukset(self):
     if self.ed["linkki"] == "":
@@ -41,8 +39,7 @@ class Utube:
     
     responssi = requests.get(self.ed["linkki"], verify=False)
     teksti = responssi.text.split("\n")
-    parsija = Parsija()
-    self.ehdotukset = parsija.kasittele_ehdotukset(teksti)
+    self.ehdotukset = parsija.parsi_ehdotukset(teksti)
          
   def ota_otsake(self, linkki):
     responssi = requests.get(linkki, verify=False)
