@@ -15,12 +15,13 @@ class Kayttoliittyma:
     print("    ", end="")    
     print("| Video: ", end="")
     
-    if self.youtube.ota_video == True:
+    if self.youtube.video == True:
       print("on", end="")
     else:
       print("ei", end="")
       
     print(" | Monta: " + str(self.monta), end="")
+    print(" | Edellinen: " + self.youtube.ed["otsake"], end="")
     print(" |")
     
   def auta(self):
@@ -70,7 +71,14 @@ class Kayttoliittyma:
           self.youtube.kasittele_haku(komento[1])     
           if len(komento) >= 3:
             self.monta = int(komento[2])
-          self.youtube.nayta_tulokset(self.monta)         
+          self.youtube.nayta_tulokset(self.monta)      
+          
+      if komento[0] == "ehd":
+        self.youtube.kasittele_ehdotukset()
+        if len(komento) >= 2:
+          self.monta = int(komento[1])
+        self.youtube.nayta_ehdotukset(self.monta)
+        
 
       if komento[0][0 : 2] == "on":
         if len(komento) >= 3:
