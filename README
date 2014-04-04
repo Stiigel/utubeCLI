@@ -11,7 +11,7 @@ Riippuvuudet
 -youtube-dl
 -python3 
 -python3-requests
-  *Toiminee myös python2, en ole kokeillut
+  *Toiminee myös python2 jos määrittää enkoodauksen, en ole kokeillut
 -ja varmaan kaikkea muutakin
 
 Normaalisti käyttää mpvtä, mutta on helposti muokattavissa käyttämään es. mplayeriä tms.
@@ -27,6 +27,7 @@ TODO
 ----
 
 Kaikkee
+es. mene, soittolistat ym. ym. nam nam
 
 
 
