@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 """
 Pääjuttu
 
@@ -12,4 +13,3 @@ if "--help" in sys.argv or "--apua" in sys.argv:
 else:
   kayttoliittyma.aloita()
     
-  
