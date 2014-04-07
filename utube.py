@@ -7,8 +7,7 @@ import sys, re, parsija
 import subprocess
 import requests
 
-class Utube:
-  
+class Utube:  
   def __init__(self):
     self.video = False
     self.utuAlku = "https://youtube.com/watch/?v="
@@ -16,7 +15,7 @@ class Utube:
     self.tulokset = []    
     self.ehdotukset = []
     
-    self.ed = {"otsake" : "", "linkki" : ""}
+    self.nyk = {"otsake" : "", "linkki" : ""}
     
   def laita_video(self):
     self.video = not self.video
@@ -31,13 +30,13 @@ class Utube:
     self.tulokset = parsija.parsi_haku(teksti)
 
   def kasittele_ehdotukset(self):
-    if self.ed["linkki"] == "":
+    if self.nyk["linkki"] == "":
       print("¡Kuuntele/lataa/mene ensin!")
       return
     
     self.ehdotukset = []
     
-    responssi = requests.get(self.ed["linkki"], verify=False)
+    responssi = requests.get(self.nyk["linkki"], verify=False)
     teksti = responssi.text.split("\n")
     self.ehdotukset = parsija.parsi_ehdotukset(teksti)
          
@@ -48,10 +47,18 @@ class Utube:
     alku = re.search("<title>",teksti).end()
     loppu = re.search("</title>",teksti).start()
     return teksti[alku : loppu]
-    
-  def kuuntele_kpl(self, mones, linkki=""):
-    if linkki == "":
+  
+  def laita_linkki(self, mones, linkki="", ehd=-21):
+    if linkki == "" and ehd == -21:
       linkki = "https://www.youtube.com/watch?v=" + self.tulokset[mones]["linkki"]
+    elif linkki == "" and ehd != -21:
+      linkki = "https://www.youtube.com/watch?v=" + self.ehdotukset[ehd]["linkki"]
+    
+    return linkki      
+    
+  def kuuntele_kpl(self, mones, linkki="", ehd=-21):
+    linkki = self.laita_linkki(mones, linkki, ehd)
+      
     prosessi = subprocess.Popen(["youtube-dl", "-g", linkki], stdout=subprocess.PIPE)
     utuLinkki, error = prosessi.communicate()
     utuLinkki = utuLinkki.rstrip()
@@ -65,13 +72,11 @@ class Utube:
     
     subprocess.call(kaskyt)
     
-    self.ed["otsake"] = otsake
-    self.ed["linkki"] = linkki
+    self.nyk["otsake"] = otsake
+    self.nyk["linkki"] = linkki    
     
-    
-  def lataa_kpl(self, mones, linkki=""):
-    if linkki == "":
-      linkki = "https://www.youtube.com/watch?v=" + self.tulokset[mones]["linkki"]
+  def lataa_kpl(self, mones, linkki="", ehd=-21):
+    linkki = self.laita_linkki(mones, linkki, ehd)
     
     kaskyt = ["youtube-dl", linkki, "-cit"]
     if self.video == False:
@@ -79,9 +84,17 @@ class Utube:
     
     subprocess.call(kaskyt)
     
-    self.ed["otsake"] = otsake
-    self.ed["linkki"] = linkki
+    self.nyk["otsake"] = otsake
+    self.nyk["linkki"] = linkki
     
+  def mene(self, mones, linkki=""):
+    if linkki == "":
+      self.nyk["otsake"] = self.tulokset[mones - 1]["otsake"]
+      self.nyk["linkki"] = "https://www.youtube.com/watch?v=" + self.tulokset[mones - 1]["linkki"]
+    else:
+      self.nyk["linkki"] = linkki
+      self.nyk["otsake"] = self.ota_otsake(linkki)
+      
   def nayta_ehdotukset(self,monta):
     if len(self.ehdotukset) == 0:
       return
@@ -94,8 +107,7 @@ class Utube:
         kerrat = self.ehdotukset[i]["kerrat"]
         print(str(i + 1) + ". tulos: " + otsake + " | " + aika + " | " + tekija)
         
-  def nayta_tulokset(self, monta):
-    
+  def nayta_tulokset(self, monta):    
     for i in range(monta):      
       if len(self.tulokset) >= i:
         aika = self.tulokset[i]["aika"]
