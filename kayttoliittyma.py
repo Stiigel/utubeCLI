@@ -3,8 +3,7 @@ Käsittelee käyttäjän antamat komennot, ja välittää ne utubelle
 
 """
 
-import shlex
-import utube
+import shlex, os, subprocess, utube
 
 class Kayttoliittyma:
   def __init__(self):
@@ -38,6 +37,7 @@ class Kayttoliittyma:
     print(" ehd                     - näytä nykyisen videon ehdotukset ")
     print(" ehk [mones]             - soittaa monennen ehdotuksen      ")
     print(" ehl [mones]             - lataa monennen ehdotuksen        ")
+    print(" ls, cd, pwd             - toimivat kuten normaalisti       ")
     print("                         -                                  ")
     
     
@@ -113,12 +113,14 @@ class Kayttoliittyma:
         for i in range(1, len(komento)):          
           self.youtube.lataa_kpl(0, ehd=int(komento[i]) - 1)            
       except:
-        print("sörs")
+        print("lörs")
         
     elif komento[0] == "ehk":
-      for i in range(1, len(komento)):
-        self.youtube.kuuntele_kpl(0, ehd=int(komento[i]) - 1)
-  
+      try:
+        for i in range(1, len(komento)):
+          self.youtube.kuuntele_kpl(0, ehd=int(komento[i]) - 1)
+      except:
+        print("lärä")
     elif komento[0] == "help" or komento[0] == "apua":
       self.auta()
       
@@ -129,6 +131,18 @@ class Kayttoliittyma:
       elif komento[0][6] == "k":
         self.youtube.kuuntele_kpl(0, linkki=komento[1])
 
+    elif komento[0] == "cd":
+      try:
+        os.chdir(komento[1])
+      except OSError:
+        print("Ei suuchia hakemistoa")
+    
+    elif komento[0] == "ls":
+      subprocess.call(["ls", "-p"])
+      
+    elif komento[0] == "pwd":
+      subprocess.call(["pwd"])
+      
   def aloita(self, apu=False):    
     if apu == True:
       self.auta()
