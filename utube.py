@@ -3,15 +3,12 @@ Kaikki itse YTiin liittyvät jutut, ja musan/videojen näyttäminen ja lataamine
 
 """
 
-import sys, re, parsija
-import subprocess
-import requests
+import sys, re, parsija, subprocess, requests
 
 class Utube:  
   def __init__(self):
     self.video = False
-    self.utuAlku = "https://youtube.com/watch/?v="
-    
+
     self.tulokset = []    
     self.ehdotukset = []
     
@@ -54,6 +51,7 @@ class Utube:
     elif linkki == "" and ehd != -21:
       linkki = "https://www.youtube.com/watch?v=" + self.ehdotukset[ehd]["linkki"]
     
+    print(linkki)
     return linkki      
     
   def kuuntele_kpl(self, mones, linkki="", ehd=-21):

@@ -4,6 +4,7 @@ Parsii YT-sivun tarvittaviksi osasiksi.
 """
 
 import re
+
 def parsi_haku(teksti):
   tulokset = []
   

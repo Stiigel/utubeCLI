@@ -26,19 +26,19 @@ class Kayttoliittyma:
   def auta(self):
     print("Tämä on tämmöinen utubejuttu")
     print("Komennot: ")
-    print(" --video                 - vaihtaa videoon/epävideoon       ")
-    print(" --monta [n]             - monta tulosta näytetään          ")
-    print(" Hae [haku] [monta]      - hae & näytä [monta] tulosta      ")
-    print(" k [mones]               - mones tulos kuunnellaan          ")
-    print(" l [mones]               - mones tulos ladataan             ")
-    print(" onk/l [haku]            - kokeile onneasi, kuuntele/lataa  ")
-    print(" pois/exit/moi/quit/bye  - mene pois                        ")
-    print(" mene [mones]            - mene monenteen tulokseen         ")
-    print(" ehd                     - näytä nykyisen videon ehdotukset ")
-    print(" ehk [mones]             - soittaa monennen ehdotuksen      ")
-    print(" ehl [mones]             - lataa monennen ehdotuksen        ")
-    print(" ls, cd, pwd             - toimivat kuten normaalisti       ")
-    print("                         -                                  ")
+    print(" --video                 - vaihtaa videoon/epävideoon                     ")
+    print(" --monta [n]             - monta tulosta näytetään                        ")
+    print(" Hae [haku] [monta]      - hae & näytä [monta] tulosta                    ")
+    print(" k [mones]               - mones tulos kuunnellaan                        ")
+    print(" l [mones]               - mones tulos ladataan                           ")
+    print(" onk/l [haku]            - kokeile onneasi, kuuntele/lataa                ")
+    print(" pois/exit/moi/quit/bye  - mene pois                                      ")
+    print(" mene [mones]            - mene monenteen tulokseen                       ")
+    print(" ehd                     - näytä nykyisen videon ehdotukset               ")
+    print(" ehk [mones]             - soittaa monennen ehdotuksen                    ")
+    print(" ehl [mones]             - lataa monennen ehdotuksen                      ")
+    print(" ls, cd, pwd, mkdir      - toimivat normaalisti (ilman lisäparametrejä)   ")
+    print("                         -                                                ")
     
     
   def kasittele_komento(self, komento):
@@ -143,6 +143,12 @@ class Kayttoliittyma:
     elif komento[0] == "pwd":
       subprocess.call(["pwd"])
       
+    elif komento[0] == "mkdir":
+      try:
+        subprocess.call(["mkdir", komento[1]])
+      except:
+        print("Anna kunnoll. nimi")
+      
   def aloita(self, apu=False):    
     if apu == True:
       self.auta()
@@ -158,8 +164,3 @@ class Kayttoliittyma:
       for komento in komennot.split(";"):
         if self.kasittele_komento(komento) == "pois":
           return
-
-
-      
-        
-    
