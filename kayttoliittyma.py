@@ -134,6 +134,7 @@ class Kayttoliittyma:
     elif komento[0] == "cd":
       try:
         os.chdir(komento[1])
+        subprocess.call(["pwd"])
       except OSError:
         print("Ei suuchia hakemistoa")
     

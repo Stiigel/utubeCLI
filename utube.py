@@ -43,6 +43,7 @@ class Utube:
     
     alku = re.search("<title>",teksti).end()
     loppu = re.search("</title>",teksti).start()
+    print("Otsake: " + teksti[alku : loppu])
     return teksti[alku : loppu]
   
   def laita_linkki(self, mones, linkki="", ehd=-21):
@@ -51,7 +52,7 @@ class Utube:
     elif linkki == "" and ehd != -21:
       linkki = "https://www.youtube.com/watch?v=" + self.ehdotukset[ehd]["linkki"]
     
-    print(linkki)
+    print("Linkki: " + linkki)
     return linkki      
     
   def kuuntele_kpl(self, mones, linkki="", ehd=-21):
@@ -67,7 +68,7 @@ class Utube:
     
     if self.video == False:
       kaskyt.append("--no-video") 
-    
+      
     subprocess.call(kaskyt)
     
     self.nyk["otsake"] = otsake
@@ -103,7 +104,8 @@ class Utube:
         otsake = self.ehdotukset[i]["otsake"]
         linkki = self.ehdotukset[i]["linkki"]
         kerrat = self.ehdotukset[i]["kerrat"]
-        print(str(i + 1) + ". tulos: " + otsake + " | " + aika + " | " + tekija)
+        print("%i. tulos: %s | %s | %s | %s" % (i + 1, otsake, aika, tekija, kerrat))
+        #print(str(i + 1) + ". tulos: " + otsake + " | " + aika + " | " + tekija)
         
   def nayta_tulokset(self, monta):    
     for i in range(monta):      
@@ -114,8 +116,9 @@ class Utube:
         linkki = self.tulokset[i]["linkki"]
         kerrat = self.tulokset[i]["kerrat"]
         sitten = self.tulokset[i]["sitten"]
-
-      print(str(i + 1) + ". tulos: " + otsake + " | " + aika + " | " + tekija + " | " + sitten)
+      
+      print("%i. tulos: %s | %s | %s | %s | %s" % (i + 1, otsake, aika, tekija, sitten, kerrat))
+      #print(str(i + 1) + ". tulos: " + otsake + " | " + aika + " | " + tekija + " | " + sitten)
       
       if i >= 20:
         break

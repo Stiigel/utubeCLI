@@ -51,7 +51,7 @@ def parsi_haku(teksti):
           sitten = re.search('<li>(.*?)sitten</li><li>', teksti[i]).group(1)
           tulokset[mones]["sitten"] = sitten
         if 'näyttökertaa' in teksti[i]:
-          kerrat = re.search('<li>(.*?) näyttökertaa</li>',teksti[i]).group(1)
+          kerrat = re.search('sitten</li><li>(.*?) näyttökertaa</li>',teksti[i]).group(1)
           tulokset[mones]["kerrat"] = kerrat
           tekijaAlku = -1
           kohta = -1
