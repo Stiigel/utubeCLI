@@ -5,6 +5,9 @@ Parsii YT-sivun tarvittaviksi osasiksi.
 
 import re
 
+def lisaa_juttu(lista, mones, tulos):
+  print("Löts lölöö")
+
 def parsi_haku(teksti):
   tulokset = []
   
@@ -67,10 +70,10 @@ def parsi_ehdotukset(teksti):
   mones = -1
   for i in range(len(teksti)):
     
-    if '"related-video  spf-link yt-uix-sessionlink"' in teksti[i]:
+    if 'related-video' in teksti[i]:
       mones += 1
       kohta = i
-      ehdotukset.append({})      
+      ehdotukset.append({})     
     
     if kohta != -1:
       if 'href="/watch?v=' in teksti[i]:

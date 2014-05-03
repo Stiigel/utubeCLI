@@ -17,10 +17,17 @@ class Utube:
   def laita_video(self):
     self.video = not self.video
   
-  def kasittele_haku(self, haku):    
+  def kasittele_haku(self, haku, soittolista=False):    
     self.tulokset = []
     
-    parametrit = { "search_query" : haku, "filters" : "video", "lclk" : "video", "hl" : "fi" }
+    if soittolista == False:
+      parametrit = {"filters" : "video", "lclk" : "video"}
+    else:
+      parametrit = {"filters" : "playlist", "lclk" : "playlist"}
+      
+    parametrit["search_query"] = haku
+    parametrit["hl"] = "fi"
+    
     responssi = requests.get("https://www.youtube.com/results", params=parametrit, verify=False)
     teksti = responssi.text.split("\n")
     
@@ -83,7 +90,7 @@ class Utube:
     
     subprocess.call(kaskyt)
     
-    self.nyk["otsake"] = otsake
+    #self.nyk["otsake"] = otsake
     self.nyk["linkki"] = linkki
     
   def mene(self, mones, linkki=""):
@@ -96,6 +103,7 @@ class Utube:
       
   def nayta_ehdotukset(self,monta):
     if len(self.ehdotukset) == 0:
+      print("koira")
       return
     for i in range(monta):
       if len(self.ehdotukset) >= i:
@@ -105,7 +113,6 @@ class Utube:
         linkki = self.ehdotukset[i]["linkki"]
         kerrat = self.ehdotukset[i]["kerrat"]
         print("%i. tulos: %s | %s | %s | %s" % (i + 1, otsake, aika, tekija, kerrat))
-        #print(str(i + 1) + ". tulos: " + otsake + " | " + aika + " | " + tekija)
         
   def nayta_tulokset(self, monta):    
     for i in range(monta):      
@@ -118,7 +125,6 @@ class Utube:
         sitten = self.tulokset[i]["sitten"]
       
       print("%i. tulos: %s | %s | %s | %s | %s" % (i + 1, otsake, aika, tekija, sitten, kerrat))
-      #print(str(i + 1) + ". tulos: " + otsake + " | " + aika + " | " + tekija + " | " + sitten)
       
       if i >= 20:
         break

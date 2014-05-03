@@ -37,9 +37,62 @@ class Kayttoliittyma:
     print(" ehd                     - näytä nykyisen videon ehdotukset               ")
     print(" ehk [mones]             - soittaa monennen ehdotuksen                    ")
     print(" ehl [mones]             - lataa monennen ehdotuksen                      ")
-    print(" ls, cd, pwd, mkdir      - toimivat normaalisti (ilman lisäparametrejä)   ")
+    print(" ls, cd, pwd, mkdir      - toimivat normaalisti                           ")
     print("                         -                                                ")
+  
+  def jarjestelmakomento(self,komento):
+    if komento[0] == "cd":
+      try:
+        os.chdir(komento[1])
+        subprocess.call(["pwd"])
+      except OSError:
+        print("Ei suuchia hakemistoa")
     
+    elif komento[0] == "ls":
+      subprocess.call(["ls", "-p"] + komento[1:])
+      
+    elif komento[0] == "pwd":
+      subprocess.call(["pwd"])
+      
+    elif komento[0] == "mkdir":
+      try:
+        subprocess.call(["mkdir", komento[1]])
+      except:
+        print("Anna kunnoll. nimi")
+        
+  def tiedosto(self, komento):
+    if komento[0] == "tiedosto":
+      if len(komento) >= 3:
+        try:
+          tiedosto = open(komento[2], 'r')
+          kplt = tiedosto.readlines()
+          tiedosto.close()
+        except OSError:
+          kplt = []
+          print("Ei suuchia tiedostoa")
+        for kpl in kplt:
+          try:
+            self.youtube.kasittele_haku(kpl)
+            if komento[1] == "l":
+              self.youtube.lataa_kpl(0)        
+            elif komento[1] == "k":
+              self.youtube.kuuntele_kpl(0)
+          except:
+            pass
+          
+  def kokeile_onnea(self, komento):
+    if komento[0][0 : 2] == "on":
+      if len(komento) >= 3:
+        mones = int(komento[2])
+      else:
+        mones = 1
+      self.youtube.kasittele_haku(komento[1])
+      if len(komento[0]) >= 3:
+        if komento[0][2] == "k":
+          self.youtube.kuuntele_kpl(mones - 1)
+      
+        elif komento[0][2] == "l":
+          self.youtube.lataa_kpl(mones - 1)        
     
   def kasittele_komento(self, komento):
     try:
@@ -66,9 +119,12 @@ class Kayttoliittyma:
 
     if komento[0] == "hae":
       if len(komento) >= 2: 
-        self.youtube.kasittele_haku(komento[1])     
-        if len(komento) >= 3:
-          self.monta = int(komento[2])
+        if "--sl" in komento:
+          self.youtube.kasittele_haku(komento[1], soittolista=True)
+        else:
+          self.youtube.kasittele_haku(komento[1])
+        #if len(komento) >= 3:
+          #self.monta = int(komento[2])
         self.youtube.nayta_tulokset(self.monta)      
         
     if komento[0] == "ehd":
@@ -81,19 +137,6 @@ class Kayttoliittyma:
       if len(komento) >= 2:
         self.youtube.mene(int(komento[1]))      
 
-    if komento[0][0 : 2] == "on":
-      if len(komento) >= 3:
-        mones = int(komento[2])
-      else:
-        mones = 1
-      self.youtube.kasittele_haku(komento[1])
-      if len(komento[0]) >= 3:
-        if komento[0][2] == "k":
-          self.youtube.kuuntele_kpl(mones - 1)
-      
-        elif komento[0][2] == "l":
-          self.youtube.lataa_kpl(mones - 1)
-        
     elif komento[0] == "l":
       try:
         for i in range(1, len(komento)):          
@@ -130,25 +173,10 @@ class Kayttoliittyma:
         
       elif komento[0][6] == "k":
         self.youtube.kuuntele_kpl(0, linkki=komento[1])
-
-    elif komento[0] == "cd":
-      try:
-        os.chdir(komento[1])
-        subprocess.call(["pwd"])
-      except OSError:
-        print("Ei suuchia hakemistoa")
-    
-    elif komento[0] == "ls":
-      subprocess.call(["ls", "-p"])
       
-    elif komento[0] == "pwd":
-      subprocess.call(["pwd"])
-      
-    elif komento[0] == "mkdir":
-      try:
-        subprocess.call(["mkdir", komento[1]])
-      except:
-        print("Anna kunnoll. nimi")
+    self.kokeile_onnea(komento)
+    self.tiedosto(komento)    
+    self.jarjestelmakomento(komento)
       
   def aloita(self, apu=False):    
     if apu == True:
