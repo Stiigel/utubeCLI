@@ -8,6 +8,12 @@ import re
 def lisaa_juttu(lista, mones, tulos):
   print("Löts lölöö")
 
+def parsi_juttu(etsittava, kohde):
+  juttu = 'ei'
+  if re.search(etsittava, kohde) != None:
+    juttu = re.search(etsittava, kohde).group(1)
+  return juttu  
+
 def parsi_haku(teksti):
   tulokset = []
   
@@ -21,41 +27,34 @@ def parsi_haku(teksti):
 
     if kohta != -1:
       if 'class="video-time">' in teksti[i] and 'video-time">__' not in teksti[i]:
-
         mones += 1
         tulokset.append({})
-        aika = re.search('"video-time">(.*?)</span>', teksti[i]).group(1)
-        tulokset[mones]["aika"] = aika
+        tulokset[mones]["aika"] = parsi_juttu('"video-time">(.*?)</span>', teksti[i])
         
       if 'yt-uix-sessionlink yt-uix-tile-link' in teksti[i]:
         tietoAlku = i
       
       if tietoAlku != -1:
         if 'title="' in teksti[i]:
-          otsake = re.search('title="(.*?)"', teksti[i]).group(1)
-          tulokset[mones]["otsake"] = otsake
+          tulokset[mones]["otsake"] = parsi_juttu('title="(.*?)"', teksti[i])
         
         if 'href="/watch?v=' in teksti[i]:
-          linkki = re.search('href="/watch\?v=(.*?)"', teksti[i]).group(1)
-          tulokset[mones]["linkki"] = linkki
+          tulokset[mones]["linkki"] = parsi_juttu('href="/watch\?v=(.*?)"', teksti[i])
           tietoAlku = -1
 
         if '>' in teksti[i]:
           tietoAlku = -1
       
-      if 'g-hovercard yt-uix-sessionlink yt-user-name spf-link' in teksti[i]:
+      if 'g-hovercard yt-uix-sessionlink yt-user-name' in teksti[i]:
         tekijaAlku = i
       
       if tekijaAlku != -1:
         if 'data-name' in teksti[i]:
-          tekija = re.search('data-name="">(.*?)</a>', teksti[i]).group(1)
-          tulokset[mones]["tekija"] = tekija
+          tulokset[mones]["tekija"] = parsi_juttu('data-name="">(.*?)</a>', teksti[i])
         if 'sitten' in teksti[i]:
-          sitten = re.search('<li>(.*?)sitten</li><li>', teksti[i]).group(1)
-          tulokset[mones]["sitten"] = sitten
+          tulokset[mones]["sitten"] = parsi_juttu('<li>(.*?)sitten</li><li>', teksti[i])
         if 'näyttökertaa' in teksti[i]:
-          kerrat = re.search('sitten</li><li>(.*?) näyttökertaa</li>',teksti[i]).group(1)
-          tulokset[mones]["kerrat"] = kerrat
+          tulokset[mones]["kerrat"] = parsi_juttu('sitten</li><li>(.*?) näyttökertaa</li>',teksti[i])
           tekijaAlku = -1
           kohta = -1
           
