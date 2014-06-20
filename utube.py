@@ -100,7 +100,7 @@ class Utube:
     else:
       self.nyk["linkki"] = linkki
       self.nyk["otsake"] = self.ota_otsake(linkki)
-      
+    
   def nayta_ehdotukset(self,monta):
     if len(self.ehdotukset) == 0:
       print("koira")
@@ -115,16 +115,45 @@ class Utube:
         print("%i. tulos: %s | %s | %s | %s" % (i + 1, otsake, aika, tekija, kerrat))
         
   def nayta_tulokset(self, monta):    
-    for i in range(monta):      
-      if len(self.tulokset) >= i:
-        aika = self.tulokset[i]["aika"]
-        tekija = self.tulokset[i]["tekija"]
-        otsake = self.tulokset[i]["otsake"]
-        linkki = self.tulokset[i]["linkki"]
-        kerrat = self.tulokset[i]["kerrat"]
-        sitten = self.tulokset[i]["sitten"]
+    try:
+      for i in range(monta):      
+        if len(self.tulokset) >= i:
+          aika = self.tulokset[i]["aika"]
+          tekija = self.tulokset[i]["tekija"]
+          otsake = self.tulokset[i]["otsake"]
+          linkki = self.tulokset[i]["linkki"]
+          kerrat = self.tulokset[i]["kerrat"]
+          sitten = self.tulokset[i]["sitten"]
       
-      print("%i. tulos: %s | %s | %s | %s | %s" % (i + 1, otsake, aika, tekija, sitten, kerrat))
+        print("%i. tulos: %s | %s | %s | %s | %s | %s" % (i + 1, otsake, aika, tekija, sitten, kerrat, linkki))
       
-      if i >= 20:
-        break
+        if i >= 20:
+          break
+        
+    except Exception as e:
+      print(e)
+      
+  def soittolista(self, linkki, tapa):
+    responssi = requests.get(linkki, verify=False)
+    kplt = parsija.parsi_soittolista(responssi.text.split('\n'))
+    for kpl in kplt:
+      linkki = 'https://www.youtube.com/watch?v=' + kpl['linkki']
+      
+      if tapa == 'l':
+        self.lataa_kpl(0, linkki)
+      elif tapa == 'k':
+        self.kuuntele_kpl(0, linkki)
+      else:
+        return
+  
+  def discogs(self, linkki, tapa):
+    kplt = parsija.parsi_discogs(linkki)
+    for kpl in kplt:
+      self.kasittele_haku(kpl)        
+      if tapa == 'l':
+        self.lataa_kpl(0)
+      elif tapa == 'k':
+        self.kuuntele_kpl(0)
+      else:
+        return
+    

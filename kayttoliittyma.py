@@ -38,6 +38,7 @@ class Kayttoliittyma:
     print(" ehk [mones]             - soittaa monennen ehdotuksen                    ")
     print(" ehl [mones]             - lataa monennen ehdotuksen                      ")
     print(" ls, cd, pwd, mkdir      - toimivat normaalisti                           ")
+    print(" tiedosto l/k nimi       - soittaa/lataa tiedoston jutut rivi kerrallaan  ")
     print("                         -                                                ")
   
   def jarjestelmakomento(self,komento):
@@ -77,6 +78,9 @@ class Kayttoliittyma:
               self.youtube.lataa_kpl(0)        
             elif komento[1] == "k":
               self.youtube.kuuntele_kpl(0)
+            elif komento[1] == "nayta":
+              print(kpl.strip() + " :")
+              self.youtube.nayta_tulokset(self.monta)
           except:
             pass
           
@@ -93,6 +97,16 @@ class Kayttoliittyma:
       
         elif komento[0][2] == "l":
           self.youtube.lataa_kpl(mones - 1)        
+          
+  def discogs(self, komento):
+    if komento[0][0 : 7] == 'discogs':
+      try:
+        self.youtube.discogs(komento[1], komento[0][-1])
+      except Exception as e:
+        print(e)
+        
+      
+    
     
   def kasittele_komento(self, komento):
     try:
@@ -174,9 +188,16 @@ class Kayttoliittyma:
       elif komento[0][6] == "k":
         self.youtube.kuuntele_kpl(0, linkki=komento[1])
       
+    elif komento[0][:11] == 'soittolista':
+      try: 
+        self.youtube.soittolista(komento[1], komento[0][11])
+      except Exception as e:
+        print(e)
+    
     self.kokeile_onnea(komento)
     self.tiedosto(komento)    
     self.jarjestelmakomento(komento)
+    self.discogs(komento)
       
   def aloita(self, apu=False):    
     if apu == True:
