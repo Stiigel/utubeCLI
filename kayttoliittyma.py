@@ -23,23 +23,25 @@ class Kayttoliittyma:
     print(" | Nykyinen: " + self.youtube.nyk["otsake"], end="")
     print(" |")
     
-  def auta(self):
-    print("Tämä on tämmöinen utubejuttu")
-    print("Komennot: ")
-    print(" --video                 - vaihtaa videoon/epävideoon                     ")
-    print(" --monta [n]             - monta tulosta näytetään                        ")
-    print(" Hae [haku] [monta]      - hae & näytä [monta] tulosta                    ")
-    print(" k [mones]               - mones tulos kuunnellaan                        ")
-    print(" l [mones]               - mones tulos ladataan                           ")
-    print(" onk/l [haku]            - kokeile onneasi, kuuntele/lataa                ")
-    print(" pois/exit/moi/quit/bye  - mene pois                                      ")
-    print(" mene [mones]            - mene monenteen tulokseen                       ")
-    print(" ehd                     - näytä nykyisen videon ehdotukset               ")
-    print(" ehk [mones]             - soittaa monennen ehdotuksen                    ")
-    print(" ehl [mones]             - lataa monennen ehdotuksen                      ")
-    print(" ls, cd, pwd, mkdir      - toimivat normaalisti                           ")
-    print(" tiedosto l/k nimi       - soittaa/lataa tiedoston jutut rivi kerrallaan  ")
-    print("                         -                                                ")
+  def auta(self, komento):      
+    avut = ['apua', 'help', 'auta']
+    if komento[0] in avut:
+      print("Tämä on tämmöinen utubejuttu")
+      print("Komennot: ")
+      print(" --video                 - vaihtaa videoon/epävideoon                     ")
+      print(" --monta [n]             - monta tulosta näytetään                        ")
+      print(" Hae [haku] [monta]      - hae & näytä [monta] tulosta                    ")
+      print(" k [mones]               - mones tulos kuunnellaan                        ")
+      print(" l [mones]               - mones tulos ladataan                           ")
+      print(" onk/l [haku]            - kokeile onneasi, kuuntele/lataa                ")
+      print(" pois/exit/moi/quit/bye  - mene pois                                      ")
+      print(" mene [mones]            - mene monenteen tulokseen                       ")
+      print(" ehd                     - näytä nykyisen videon ehdotukset               ")
+      print(" ehk [mones]             - soittaa monennen ehdotuksen                    ")
+      print(" ehl [mones]             - lataa monennen ehdotuksen                      ")
+      print(" ls, cd, pwd, mkdir      - toimivat normaalisti                           ")
+      print(" tiedosto l/k nimi       - soittaa/lataa tiedoston jutut rivi kerrallaan  ")
+      print("                         -                                                ")
   
   def jarjestelmakomento(self,komento):
     if komento[0] == "cd":
@@ -104,16 +106,53 @@ class Kayttoliittyma:
         self.youtube.discogs(komento[1], komento[0][-1])
       except Exception as e:
         print(e)
+  
+  def pois(self, komento):
+    pois = ["bye", "exit", "quit", "moi", "pois"]
+    if komento[0] in pois:
+      print("_O/")
+      return "pois"
+    
+  def nykyinen(self, komento):
+    if komento[0][0:3] == 'nyk':
+      if komento[0][3] == 'k':
+        self.youtube.kuuntele_kpl(linkki=self.youtube.nyk['linkki'])
+      elif komento[0][3] == 'l':
+        self.youtube.lataa_kpl(linkki=self.youtube.nyk['linkki'])
+  
+  def mene(self, komento):
+    if komento[0] == "mene":
+      if len(komento) >= 2:
+        try:
+          self.youtube.mene(int(komento[1]))      
+        except:
+          self.youtube.mene(-1, komento[1])
+          
+  def ehdotus(self, komento):
+    if komento[0] == 'eh':
+      if len(komento[0]) == 2:
+        if self.youtube.kasittele_ehdotukset() == 1:
+          self.youtube.nayta_tulokset(self.monta, ehd=True)   
         
-      
-    
-    
+      elif komento[0][3] == 'k':
+        for i in range(1, len(komento)):
+          try: self.youtube.kuuntele_kpl(0, ehd=int(komento[i]) - 1)
+          except: pass
+        
+      elif komento[0][3] == 'l':
+        for i in range(1, len(komento)):          
+          try: self.youtube.lataa_kpl(0, ehd=int(komento[i]) - 1)
+          except: pass
+        
   def kasittele_komento(self, komento):
     try:
       komento = shlex.split(komento)
     except:
       print("¡Sulje sitaatit!")
       return
+    
+    if len(komento) < 1: return
+    if self.pois(komento) == 'pois': return 'pois'
   
     if "--video" in komento:
       self.youtube.laita_video()
@@ -124,12 +163,7 @@ class Kayttoliittyma:
           try:
             self.monta = int(komento[i + 1])
           except:
-            print("¡Anna luku!")
-    
-    pois = ["bye", "exit", "quit", "moi", "pois"]
-    if komento[0] in pois:
-      print("_O/")
-      return "pois"
+            print("¡Anna luku!")    
 
     if komento[0] == "hae":
       if len(komento) >= 2: 
@@ -137,56 +171,25 @@ class Kayttoliittyma:
           self.youtube.kasittele_haku(komento[1], soittolista=True)
         else:
           self.youtube.kasittele_haku(komento[1])
-        #if len(komento) >= 3:
-          #self.monta = int(komento[2])
+
         self.youtube.nayta_tulokset(self.monta)      
-        
-    if komento[0] == "ehd":
-      self.youtube.kasittele_ehdotukset()
-      if len(komento) >= 2:
-        self.monta = int(komento[1])
-      self.youtube.nayta_ehdotukset(self.monta)
-    
-    if komento[0] == "mene":
-      if len(komento) >= 2:
-        self.youtube.mene(int(komento[1]))      
 
     elif komento[0] == "l":
-      try:
-        for i in range(1, len(komento)):          
-          self.youtube.lataa_kpl(int(komento[i]) - 1)            
-      except:
-        print("sörs")
+      for i in range(1, len(komento)):   
+        try: self.youtube.lataa_kpl(int(komento[i]) - 1)            
+        except: pass         
         
     elif komento[0] == "k":
-      try:
-        for i in range(1, len(komento)):
-          self.youtube.kuuntele_kpl(int(komento[i]) - 1)
-      except:
-        print("lälälä")
-    
-    elif komento[0] == "ehl":
-      try:
-        for i in range(1, len(komento)):          
-          self.youtube.lataa_kpl(0, ehd=int(komento[i]) - 1)            
-      except:
-        print("lörs")
-        
-    elif komento[0] == "ehk":
-      try:
-        for i in range(1, len(komento)):
-          self.youtube.kuuntele_kpl(0, ehd=int(komento[i]) - 1)
-      except:
-        print("lärä")
-    elif komento[0] == "help" or komento[0] == "apua":
-      self.auta()
+      for i in range(1, len(komento)):
+        try: self.youtube.kuuntele_kpl(int(komento[i]) - 1)
+        except: pass
       
     elif komento[0][0:6] == "linkki":
       if komento[0][6] == "l":
-        self.youtube.lataa_kpl(0, linkki=komento[1])
+        self.youtube.lataa_kpl(linkki=komento[1])
         
       elif komento[0][6] == "k":
-        self.youtube.kuuntele_kpl(0, linkki=komento[1])
+        self.youtube.kuuntele_kpl(linkki=komento[1])
       
     elif komento[0][:11] == 'soittolista':
       try: 
@@ -194,6 +197,10 @@ class Kayttoliittyma:
       except Exception as e:
         print(e)
     
+    self.auta(komento)
+    self.ehdotus(komento)
+    self.mene(komento)
+    self.nykyinen(komento)
     self.kokeile_onnea(komento)
     self.tiedosto(komento)    
     self.jarjestelmakomento(komento)
@@ -213,4 +220,4 @@ class Kayttoliittyma:
       
       for komento in komennot.split(";"):
         if self.kasittele_komento(komento) == "pois":
-          return
+          return        
