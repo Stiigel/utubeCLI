@@ -30,10 +30,7 @@ class Utube:
     
     teksti = requests.get(uri, params=parametrit, verify=False).text
     
-    if soittolista == True:
-      self.tulokset = parsija.parsi_haku(teksti, sl=True)
-    else:
-      self.tulokset = parsija.parsi_haku(teksti)         
+    self.tulokset = parsija.parsi_haku(teksti, soittolista)
          
   def kasittele_ehdotukset(self):
     if self.nyk["linkki"] == "":
