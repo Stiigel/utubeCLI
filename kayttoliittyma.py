@@ -9,19 +9,23 @@ class Kayttoliittyma:
   def __init__(self):
     self.monta = 10
     self.youtube = utube.Utube()
-    
-  def tulosta_asetukset(self):
-    print("    ", end="")    
-    print("| Video: ", end="")
-    
-    if self.youtube.video == True:
-      print("on", end="")
+  
+  def tulosta_asetus(self, nimi, arvo):
+    print('%s: ' % nimi, end='')
+    if arvo:
+      print('on', end=' | ')
     else:
-      print("ei", end="")
+      print('ei', end=' | ')
       
-    print(" | Monta: " + str(self.monta), end="")
-    print(" | Nykyinen: " + self.youtube.nyk["otsake"], end="")
-    print(" |")
+  def tulosta_asetukset(self):
+    putki = ' | '
+    print("  ", end=putki)  
+    self.tulosta_asetus('Video', self.youtube.video)
+    self.tulosta_asetus('sl', self.youtube.sl)
+      
+    print("Monta: " + str(self.monta), end=putki)
+    print("Nykyinen: " + self.youtube.nyk["otsake"], end=putki)
+    print()
     
   def auta(self, komento):      
     avut = ['apua', 'help', 'auta']
@@ -41,7 +45,9 @@ class Kayttoliittyma:
       print(" ehl [mones]             - lataa monennen ehdotuksen                      ")
       print(" ls, cd, pwd, mkdir      - toimivat normaalisti                           ")
       print(" tiedosto l/k nimi       - soittaa/lataa tiedoston jutut rivi kerrallaan  ")
+      print(" discogsk/l              - k/l discogs release -sivun (ei master)         ")
       print("                         -                                                ")
+  
   
   def jarjestelmakomento(self,komento):
     if komento[0] == "cd":
@@ -129,21 +135,29 @@ class Kayttoliittyma:
           self.youtube.mene(-1, komento[1])
           
   def ehdotus(self, komento):
-    if komento[0] == 'eh':
-      if len(komento[0]) == 2:
-        if self.youtube.kasittele_ehdotukset() == 1:
+    if komento[0][0:2] == 'eh':
+      if self.youtube.kasittele_ehdotukset() == 1:      
+        if len(komento[0]) == 2:
           self.youtube.nayta_tulokset(self.monta, ehd=True)   
         
-      elif komento[0][3] == 'k':
-        for i in range(1, len(komento)):
-          try: self.youtube.kuuntele_kpl(0, ehd=int(komento[i]) - 1)
-          except: pass
+        elif komento[0][2] == 'k':
+          for i in range(1, len(komento)):
+            try: self.youtube.kuuntele_kpl(ehd=int(komento[i]) - 1)
+            except: pass
         
-      elif komento[0][3] == 'l':
-        for i in range(1, len(komento)):          
-          try: self.youtube.lataa_kpl(0, ehd=int(komento[i]) - 1)
-          except: pass
-        
+        elif komento[0][2] == 'l':
+          for i in range(1, len(komento)):          
+            try: self.youtube.lataa_kpl(ehd=int(komento[i]) - 1)
+            except: pass
+  
+  def nayta(self, komento):
+    if komento[0] == 'nayta':
+      ehd = False
+      if len(komento) > 1:
+        if komento[1] == 'eh':
+          ehd = True
+      self.youtube.nayta_tulokset(self.monta, ehd)
+            
   def kasittele_komento(self, komento):
     try:
       komento = shlex.split(komento)
@@ -156,6 +170,8 @@ class Kayttoliittyma:
   
     if "--video" in komento:
       self.youtube.laita_video()
+    if '--sl' in komento:
+      self.youtube.laita_sl()
     
     for i in range( len(komento) ):
       if komento[i] == "--monta":
@@ -167,11 +183,7 @@ class Kayttoliittyma:
 
     if komento[0] == "hae":
       if len(komento) >= 2: 
-        if "--sl" in komento:
-          self.youtube.kasittele_haku(komento[1], soittolista=True)
-        else:
-          self.youtube.kasittele_haku(komento[1])
-
+        self.youtube.kasittele_haku(komento[1])
         self.youtube.nayta_tulokset(self.monta)      
 
     elif komento[0] == "l":
@@ -190,13 +202,8 @@ class Kayttoliittyma:
         
       elif komento[0][6] == "k":
         self.youtube.kuuntele_kpl(linkki=komento[1])
-      
-    elif komento[0][:11] == 'soittolista':
-      try: 
-        self.youtube.soittolista(komento[1], komento[0][11])
-      except Exception as e:
-        print(e)
-    
+
+    self.nayta(komento)
     self.auta(komento)
     self.ehdotus(komento)
     self.mene(komento)
@@ -213,8 +220,7 @@ class Kayttoliittyma:
     while True:
       self.tulosta_asetukset()
       
-      komennot = input(" > ")
-      
+      komennot = input(" > ")      
       if len(komennot.strip()) == 0:
         continue
       

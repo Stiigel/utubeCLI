@@ -8,22 +8,26 @@ import sys, re, parsija, subprocess, requests
 class Utube:  
   def __init__(self):
     self.video = False
+    self.sl = False
 
     self.tulokset = []    
     self.ehdotukset = []
     
-    self.nyk = {"otsake" : "", "linkki" : "", "ehdotukset" : ""}
+    self.nyk = {"otsake" : "", "linkki" : ""}
     
   def laita_video(self):
     self.video = not self.video
+    
+  def laita_sl(self):
+    self.sl = not self.sl
   
-  def kasittele_haku(self, haku, soittolista=False):    
+  def kasittele_haku(self, haku):    
     self.tulokset = []
     
     parametrit = {'q' : haku, 'alt' : 'json', 'v' : '2'}
     
     juttu = 'videos/'
-    if soittolista == True:
+    if self.sl:
       juttu = 'playlists/snippets/'
       
     uri = 'https://gdata.youtube.com/feeds/api/' + juttu
@@ -47,14 +51,14 @@ class Utube:
   def laita_otsake(self, mones=-1, linkki='', ehd=-1):
     otsake = ''
     
-    if mones == -1 and ehd == -1:
+    if linkki != '':
       responssi = requests.get(linkki, verify=False)
       teksti = responssi.text
       otsake = re.findall('<title>(.*?)</title>', teksti)[0]
     
     elif ehd != -1:
       otsake = self.ehdotukset[mones]['otsake'] + ' - Youtube'
-    if otsake == '':
+    elif mones != -1:
       otsake = self.tulokset[mones]['otsake'] + ' - Youtube'      
     
     print(otsake)
@@ -68,9 +72,13 @@ class Utube:
     
     print("Linkki: " + linkki)
     return linkki      
-    
+
   def kuuntele_kpl(self, mones=-1, linkki="", ehd=-1):
     linkki = self.laita_linkki(mones, linkki, ehd)
+    
+    if 'playlist' in linkki:
+      self.kuuntele_soittolista(linkki)
+      return
       
     prosessi = subprocess.Popen(["youtube-dl", "-g", linkki], stdout=subprocess.PIPE)
     utuLinkki, error = prosessi.communicate()
@@ -122,18 +130,14 @@ class Utube:
         print('%s' % lista[i][juttu], end=' | ')
       print()      
 
-  def soittolista(self, linkki, tapa):
+  def kuuntele_soittolista(self, linkki):
     responssi = requests.get(linkki, verify=False)
     kplt = parsija.parsi_soittolista(responssi.text)
+
     for kpl in kplt:
       linkki = 'https://www.youtube.com/watch?v=' + kpl['linkki']
-      
-      if tapa == 'l':
-        self.lataa_kpl(0, linkki)
-      elif tapa == 'k':
-        self.kuuntele_kpl(0, linkki)
-      else:
-        return
+      self.kuuntele_kpl(0, linkki)
+
   
   def discogs(self, linkki, tapa):
     kplt = parsija.parsi_discogs(linkki)

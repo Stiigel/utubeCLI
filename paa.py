@@ -8,8 +8,9 @@ import kayttoliittyma, sys
 
 kayttoliittyma = kayttoliittyma.Kayttoliittyma()
 
+apu = False
 if "--help" in sys.argv or "--apua" in sys.argv:
-  kayttoliittyma.aloita(apu=True)
-else:
-  kayttoliittyma.aloita()
+  apu = True
+
+kayttoliittyma.aloita(apu=apu)
     

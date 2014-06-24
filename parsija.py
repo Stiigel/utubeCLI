@@ -37,13 +37,14 @@ def parsi_haku(teksti, sl=False):
    
     tulokset[i]['tyyppi'] = tyyppi
     tulokset[i]['otsake'] = kpl['title']['$t']
-    tulokset[i]['linkki'] = kpl['link'][0]['href'].split('&')[0]
     tulokset[i]['tekija'] = kpl['author'][0]['name']['$t']
     tulokset[i]['sitten'] = kpl['published']['$t']
     tulokset[i]['ehdotukset'] = kpl['link'][1]['href'] + '?alt=json'
-    if not sl:
+    if sl:
+      tulokset[i]['linkki'] = kpl['link'][1]['href'].split('&')[0]
+    else:
+      tulokset[i]['linkki'] = kpl['link'][0]['href'].split('&')[0]
       tulokset[i]['aika'] = sek2tun(int(kpl['media$group']['media$content'][0]['duration']))
-    if not sl:
       tulokset[i]['kerrat'] = kpl['yt$statistics']['viewCount']
       
   return tulokset
@@ -57,7 +58,7 @@ def parsi_soittolista(teksti):
   for i in range(len(videot)):
     kappaleet.append({})
     kappaleet[i]['nimi'] = videot[i].text.strip()
-    kappaleet[i]['linkki'] = videot[i]['href']
+    kappaleet[i]['linkki'] = ota_tunnus(videot[i]['href'])
   return kappaleet
     
 def parsi_discogs(uri):
