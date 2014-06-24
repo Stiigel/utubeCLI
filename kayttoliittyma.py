@@ -20,8 +20,8 @@ class Kayttoliittyma:
   def tulosta_asetukset(self):
     putki = ' | '
     print("  ", end=putki)  
-    self.tulosta_asetus('Video', self.youtube.video)
-    self.tulosta_asetus('sl', self.youtube.sl)
+    self.tulosta_asetus('Video', self.youtube.asetukset['video'])
+    self.tulosta_asetus('sl', self.youtube.asetukset['sl'])
       
     print("Monta: " + str(self.monta), end=putki)
     print("Nykyinen: " + self.youtube.nyk["otsake"], end=putki)
@@ -33,16 +33,19 @@ class Kayttoliittyma:
       print("Tämä on tämmöinen utubejuttu")
       print("Komennot: ")
       print(" --video                 - vaihtaa videoon/epävideoon                     ")
+      print(" --sl                    - vaihtaa hakeeko soittolistaa vai epä-          ")
       print(" --monta [n]             - monta tulosta näytetään                        ")
       print(" Hae [haku] [monta]      - hae & näytä [monta] tulosta                    ")
-      print(" k [mones]               - mones tulos kuunnellaan                        ")
-      print(" l [mones]               - mones tulos ladataan                           ")
+      print(" k [mones1] [monesn]     - mones tulos kuunnellaan                        ")
+      print(" l [mones] [monesn]      - mones tulos ladataan                           ")
       print(" onk/l [haku]            - kokeile onneasi, kuuntele/lataa                ")
       print(" pois/exit/moi/quit/bye  - mene pois                                      ")
       print(" mene [mones]            - mene monenteen tulokseen                       ")
-      print(" ehd                     - näytä nykyisen videon ehdotukset               ")
+      print(" eh                      - näytä nykyisen videon ehdotukset               ")
       print(" ehk [mones]             - soittaa monennen ehdotuksen                    ")
       print(" ehl [mones]             - lataa monennen ehdotuksen                      ")
+      print(" kom                     - näytä nykyisen kommentit                       ")
+      print(" nyk/l                   - kuuntele/lataa nykyinen                        ")
       print(" ls, cd, pwd, mkdir      - toimivat normaalisti                           ")
       print(" tiedosto l/k nimi       - soittaa/lataa tiedoston jutut rivi kerrallaan  ")
       print(" discogsk/l              - k/l discogs release -sivun (ei master)         ")
@@ -157,7 +160,16 @@ class Kayttoliittyma:
         if komento[1] == 'eh':
           ehd = True
       self.youtube.nayta_tulokset(self.monta, ehd)
-            
+  
+  def kommentit(self, komento):
+    if komento[0] == 'kom':
+      try: mista = int(komento[1])
+      except: mista = 0
+      try: mihin = int(komento[2])
+      except: mihin = 10
+      
+      self.youtube.nayta_kommentit(mista, mihin)
+      
   def kasittele_komento(self, komento):
     try:
       komento = shlex.split(komento)
@@ -168,10 +180,9 @@ class Kayttoliittyma:
     if len(komento) < 1: return
     if self.pois(komento) == 'pois': return 'pois'
   
-    if "--video" in komento:
-      self.youtube.laita_video()
-    if '--sl' in komento:
-      self.youtube.laita_sl()
+    if "--video" in komento: self.youtube.vaihda_asetus('video')
+    if '--sl' in komento: self.youtube.vaihda_asetus('sl')
+    if '--muista' in komento: self.youtube.vaihda_asetus('muista')
     
     for i in range( len(komento) ):
       if komento[i] == "--monta":
@@ -212,6 +223,7 @@ class Kayttoliittyma:
     self.tiedosto(komento)    
     self.jarjestelmakomento(komento)
     self.discogs(komento)
+    self.kommentit(komento)
       
   def aloita(self, apu=False):    
     if apu == True:
@@ -226,4 +238,6 @@ class Kayttoliittyma:
       
       for komento in komennot.split(";"):
         if self.kasittele_komento(komento) == "pois":
-          return        
+          self.youtube.laita_loppuasetukset()
+          return   
+    

@@ -3,42 +3,74 @@ Kaikki itse YTiin liittyvät jutut, ja musan/videojen näyttäminen ja lataamine
 
 """
 
-import sys, re, parsija, subprocess, requests
+import sys, re, parsija, subprocess, requests, os
 
 class Utube:  
   def __init__(self):
-    self.video = False
-    self.sl = False
-
     self.tulokset = []    
-    self.ehdotukset = []
+    self.ehdotukset = []   
+    self.nyk = {"otsake" : "", "linkki" : ""}    
+    self.laita_alkuasetukset()    
     
-    self.nyk = {"otsake" : "", "linkki" : ""}
+  def laita_alkuasetukset(self):
+    self.asetukset = {'video' : False, 'sl' : False, 'muista' : False}
     
-  def laita_video(self):
-    self.video = not self.video
+    koti = os.path.expanduser('~')
+    kansio = koti + '/.utubecli/'
+    tiedosto = kansio + 'asetukset.conf'
     
-  def laita_sl(self):
-    self.sl = not self.sl
+    if not os.path.isdir(kansio):
+      os.mkdir(kansio)
+    
+    if not os.path.exists(tiedosto):
+      tiedosto = open(tiedosto, 'w', encoding='utf-8')
+      for asetus in self.asetukset:
+        tiedosto.write('%s %i\n' % (asetus + self.asetukset[asetus]))
+
+      tiedosto.close()
+    
+    else:
+      tiedosto = open(tiedosto, 'r', encoding='utf-8')
+      rivit = [rivi.split(' ') for rivi in tiedosto.readlines()]
+      tiedosto.close()
+      
+      for rivi in rivit:
+        asetus = rivi[0]
+        arvo = rivi[1]
+        
+        if asetus in self.asetukset:
+          self.asetukset[asetus] = bool(int(arvo))
+      
+  def laita_loppuasetukset(self):
+    if self.asetukset['muista']:
+      tiedosto = open(os.path.expanduser('~') + '/.utubecli/asetukset.conf', 'w')
+      for asetus in self.asetukset:
+        tiedosto.write('%s %i\n' % (asetus, self.asetukset[asetus]))
+      tiedosto.close()  
+   
+  def vaihda_asetus(self, asetus):
+    self.asetukset[asetus] = not self.asetukset[asetus]
+    print('%s %i' % (asetus, self.asetukset[asetus]))
   
   def kasittele_haku(self, haku):    
-    self.tulokset = []
-    
     parametrit = {'q' : haku, 'alt' : 'json', 'v' : '2'}
     
     juttu = 'videos/'
-    if self.sl:
+    if self.asetukset['sl']:
       juttu = 'playlists/snippets/'
       
-    uri = 'https://gdata.youtube.com/feeds/api/' + juttu
-    
+    uri = 'https://gdata.youtube.com/feeds/api/' + juttu    
     teksti = requests.get(uri, params=parametrit, verify=False).text
     
-    self.tulokset = parsija.parsi_haku(teksti, soittolista)
+    self.tulokset = parsija.parsi_haku(teksti, self.asetukset['sl'])
          
   def kasittele_ehdotukset(self):
     if self.nyk["linkki"] == "":
       print("¡Kuuntele/lataa/mene ensin!")
+      return -1
+    
+    if 'playlist' in self.nyk['linkki']:
+      print("Ei ehdotuksia soittolistioilel")
       return -1
     
     linkki = 'https://gdata.youtube.com/feeds/api/videos/%s/related?v=2&alt=json'    
@@ -48,6 +80,22 @@ class Utube:
     self.ehdotukset = parsija.parsi_haku(teksti)
     return 1
   
+  def nayta_kommentit(self, mista=0, mihin=10):
+    if 'playlist' in self.nyk['linkki']:
+      print("Ei komementeja soittolistoille")
+      return
+    
+    linkki = 'https://gdata.youtube.com/feeds/api/videos/%s/comments?v=2&alt=json' 
+    tunnus = parsija.ota_tunnus(self.nyk['linkki'])
+    teksti = requests.get(linkki % tunnus, verify=False).text
+    
+    print('\nKommentit:\n')
+    for kommentti in parsija.parsi_kommentit(teksti)[mista:mihin]:
+      print("%s @ %s:" % (kommentti['nimi'], kommentti['julkaistu']))
+      print()
+      print(kommentti['sisalto'])
+      print("-" * 20)
+              
   def laita_otsake(self, mones=-1, linkki='', ehd=-1):
     otsake = ''
     
@@ -88,7 +136,7 @@ class Utube:
     
     kaskyt = ["mpv", utuLinkki, "--title", otsake]
     
-    if self.video == False:
+    if not self.asetukset['video']:
       kaskyt.append("--no-video") 
       
     subprocess.call(kaskyt)
@@ -100,7 +148,7 @@ class Utube:
     linkki = self.laita_linkki(mones, linkki, ehd)
     
     kaskyt = ["youtube-dl", linkki, "-cit"]
-    if self.video == False:
+    if not self.asetukset['video']:
       kaskyt.append("-x")
     
     subprocess.call(kaskyt)
@@ -120,10 +168,11 @@ class Utube:
       if len(lista) <= i:
         return
      
-      jutut = ['otsake', 'aika', 'tekija', 'kerrat', 'sitten']
-      if lista[i]['tyyppi'] == 'soittolista':
+      jutut = ['otsake', 'aika', 'tekija', 'kerrat', 'julkaistu', 'tyyppi']
+      if lista[i]['tyyppi'] == 'sl':
         jutut.remove('aika')
         jutut.remove('kerrat')
+        jutut.append('maara')
       
       print("%i. tulos: " % (i + 1), end='')
       for juttu in jutut:
@@ -134,16 +183,16 @@ class Utube:
     responssi = requests.get(linkki, verify=False)
     kplt = parsija.parsi_soittolista(responssi.text)
 
-    for kpl in kplt:
-      linkki = 'https://www.youtube.com/watch?v=' + kpl['linkki']
+    for i in range(len(kplt)):
+      print("%i / %i" % ( i + 1, len(kplt)))
+      linkki = 'https://www.youtube.com/watch?v=' + kplt[i]['linkki']
       self.kuuntele_kpl(0, linkki)
 
-  
   def discogs(self, linkki, tapa):
     kplt = parsija.parsi_discogs(linkki)
     for kpl in kplt:
       print(kpl)
-      self.kasittele_haku(kpl)        
+      self.kasittele_haku(kpl)
       if tapa == 'l':
         self.lataa_kpl(0)
       elif tapa == 'k':

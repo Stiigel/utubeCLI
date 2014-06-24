@@ -10,8 +10,9 @@ Riippuvuudet
 -mpv
 -youtube-dl
 -python3 
--python3-requests
   *Toiminee myös python2 jos määrittää enkoodauksen, en ole kokeillut
+-python3-requests
+-python3-beatifulsoup4
 -ja ehkä kaikkea muutakin
 
 Normaalisti käyttää mpvtä, mutta on helposti muokattavissa käyttämään es. mplayeriä tms.
@@ -29,7 +30,8 @@ TODO
 ----
 
 Kaikkee
-es. soittolistat, käyttäjät, ym. ym. nam nam
+mutta ei enää soittolistat \o/
+es. käyttäjät, ym. ym. nam nam
 
 
 
