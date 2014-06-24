@@ -25,7 +25,7 @@ class Utube:
     if not os.path.exists(tiedosto):
       tiedosto = open(tiedosto, 'w', encoding='utf-8')
       for asetus in self.asetukset:
-        tiedosto.write('%s %i\n' % (asetus + self.asetukset[asetus]))
+        tiedosto.write('%s %i\n' % (asetus, self.asetukset[asetus]))
 
       tiedosto.close()
     
